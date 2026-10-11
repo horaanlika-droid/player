@@ -8,9 +8,11 @@ Node.js-сервер `index.js` без единой зависимости, ко
 `IMG_1468.png`: сгенерированная панель `assets/layers/plate.webp`, поверх неё —
 бобины кассеты, бумажная наклейка кассеты с надписью «catch22 / 1st anniversary
 invite», набранной крупно и контрастно шрифтом печатной машинки Special Elite,
-печатное «catch» внутри сердечка на стикере «I ♥ 22», прозрачные зоны
-управления, бегущая строка на ЖК-дисплее и индикатор воспроизведения в виде
-красной полоски на клавише PLAY.
+наклейка с бокалом «1 YEAR! CATCH 22» из `IMG_1448.jpeg` вместо «I ♥ 22»,
+прозрачные зоны управления и бегущая строка на ЖК-дисплее. Звёздочка возле
+логотипа CATCH22 убрана. Красная лампочка на PLAY мигает до первого нажатия
+на клавишу, после чего постоянно горит красным (в том числе после STOP).
+Внизу страницы — неброская подпись `designed by @stonym0ntana`.
 
 Плеер никогда не занимает больше 72% высоты окна, поэтому на iPad и десктопе
 вокруг него остаётся фон на весь экран — тот же тёплый оливково-угольный тон
@@ -94,23 +96,33 @@ python -m http.server 3000 --bind 0.0.0.0
 
 ## Инструменты и зависимости
 
-Скрипты в `tools/` (и любые новые растровые инструменты) требуют Pillow и
-numpy — без них был голый `ModuleNotFoundError: No module named 'PIL'`.
-Список зафиксирован в `tools/requirements.txt`; сами скрипты при отсутствии
-модуля теперь печатают подсказку вместо traceback:
+Растровые скрипты в `tools/` требуют Pillow и numpy, а ретушь наклейки —
+также OpenCV. Это инструменты разработки, сайт работает без Python-пакетов.
+Зависимости перечислены в `tools/requirements.txt`; при их отсутствии
+скрипты печатают подсказку:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/pip install -r tools/requirements.txt
-.venv/bin/python tools/cut_reels.py      # или make_ambient.py, fix_reel.py…
+.venv/bin/python tools/cut_reels.py
+.venv/bin/python tools/make_ambient.py
+.venv/bin/python tools/replace_sticker.py  # обязательно после make_ambient.py
 ```
+
+Последняя команда вырезает прозрачный `goblet-sticker.png` из `IMG_1448.jpeg`,
+убирает старую наклейку и звёздочку с веб-панели `plate.webp`. Повторный запуск
+`make_ambient.py` заново создаст панель из исходного фото, поэтому после него
+нужно снова выполнить `replace_sticker.py`.
 
 ## Оформление и ресурсы
 
 - `IMG_1468.png` — исходное фото плеера; из него вырезаны бобины
   (`assets/layers/reel-a.png`, `reel-b.png`, см. `tools/cut_reels.py`),
   а веб-панель с мягкой альфа-маской вокруг корпуса и основанием провода
-  сохранена в `assets/layers/plate.webp` (`tools/make_ambient.py`).
+  сохранена в `assets/layers/plate.webp` (`tools/make_ambient.py`, затем
+  `tools/replace_sticker.py` для замены наклейки и удаления звёздочки).
+- `IMG_1448.jpeg` — фото с листом наклеек; бокал с верхнего листа вырезан
+  с прозрачным фоном в `assets/layers/goblet-sticker.png`.
 - `assets/layers/cord.png` — бесшовный по вертикали RGBA-спрайт (64×256)
   прямого чёрного провода наушников, который выходит ровно по оси штекера
   PHONES (`x = 177`) и продолжается от верхнего края `.device` вверх за
@@ -120,7 +132,7 @@ python3 -m venv .venv
 - `assets/layers/noise.png` — бесшовное матовое зерно 256×256 RGB для продления
   фона вокруг плеера (`tools/make_ambient.py`, тон `#0b0b0a` и спектр зерна
   сняты с верхнего поля фото методом 2D FFT).
-- `assets/fonts/handjet-*.woff2` — Handjet для дисплея и сердечка
+- `assets/fonts/handjet-*.woff2` — Handjet для дисплея
   (кириллица + латиница).
 - `assets/fonts/special-elite-latin-400-normal.woff2` — Special Elite
   (Apache 2.0, сабсет из `@fontsource/special-elite`) для надписи на бумажной
