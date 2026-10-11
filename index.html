@@ -15,12 +15,12 @@
   <filter id="print-ink" x="-5%" y="-20%" width="110%" height="140%" color-interpolation-filters="sRGB">
     <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="22" result="grain"/>
     <feTurbulence type="fractalNoise" baseFrequency="0.035 0.09" numOctaves="3" seed="5" result="blotch"/>
-    <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.6 0 0 0 2.3" result="grainMask"/>
-    <feColorMatrix in="blotch" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -1.1 0 0 1.45" result="blotchMask"/>
+    <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.6 0 0 0 2.39" result="grainMask"/>
+    <feColorMatrix in="blotch" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -0.9 0 0 1.25" result="blotchMask"/>
     <feComposite in="grainMask" in2="blotchMask" operator="in" result="density"/>
     <feGaussianBlur in="SourceAlpha" stdDeviation="0.25" result="soft"/>
     <feComposite in="soft" in2="density" operator="in" result="inked"/>
-    <feFlood flood-color="#17110c" result="ink"/>
+    <feFlood flood-color="#140e09" result="ink"/>
     <feComposite in="ink" in2="inked" operator="in"/>
   </filter>
 </svg>
@@ -35,7 +35,7 @@
     <div class="reel reel-a" aria-hidden="true"><img src="assets/layers/reel-a.png" alt=""></div>
     <div class="reel reel-b" aria-hidden="true"><img src="assets/layers/reel-b.png" alt=""></div>
     <div class="glass" aria-hidden="true"></div>
-    <p class="cassette-label">catch22 1st anniversary invite</p>
+    <p class="cassette-label">catch22<br>1st anniversary invite</p>
     <p class="heart-tag" aria-hidden="true">catch</p>
 
     <div class="readout-clip">

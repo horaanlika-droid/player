@@ -13,8 +13,15 @@
 
 import os
 
-import numpy as np
-from PIL import Image
+try:
+    import numpy as np
+    from PIL import Image
+except ModuleNotFoundError as exc:  # подсказка вместо голого traceback
+    raise SystemExit(
+        'Инструментам нужны зависимости (не хватает модуля: %s). Выполните:\n'
+        '  python3 -m venv .venv && .venv/bin/pip install -r tools/requirements.txt\n'
+        'и запускайте скрипт через .venv/bin/python' % exc.name
+    ) from exc
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'IMG_1468.png')
