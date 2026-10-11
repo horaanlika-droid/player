@@ -20,7 +20,7 @@
     <feComposite in="grainMask" in2="blotchMask" operator="in" result="density"/>
     <feGaussianBlur in="SourceAlpha" stdDeviation="0.25" result="soft"/>
     <feComposite in="soft" in2="density" operator="in" result="inked"/>
-    <feFlood flood-color="#392c21" result="ink"/>
+    <feFlood flood-color="#17110c" result="ink"/>
     <feComposite in="ink" in2="inked" operator="in"/>
   </filter>
 </svg>
