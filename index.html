@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#101010">
+<title>Catch 22 — День Рождения</title>
+<link rel="preload" href="assets/hbd.mp3" as="audio">
+<link rel="stylesheet" href="assets/player.css">
+</head>
+<body>
+<main class="scene">
+  <div class="invite-copy visually-hidden">
+    <h1>Первый год Catch 22 записан — пора перевернуть пластинку!</h1>
+    <p>23 октября отмечаем день рождения и зовём друзей — вы в списке.</p>
+    <p>Сбор гостей — 20:00. Наб. Фонтанки, 86. Хранить. Не перезаписывать. Увидимся ♡</p>
+  </div>
+  <section class="device" id="player" aria-label="Кассетный плеер — приглашение Catch 22">
+    <img class="plate" src="assets/layers/plate.webp" alt="" width="1024" height="1536">
+    <div class="reel reel-a" aria-hidden="true"><img src="assets/layers/reel-a.png" alt=""></div>
+    <div class="reel reel-b" aria-hidden="true"><img src="assets/layers/reel-b.png" alt=""></div>
+    <div class="glass" aria-hidden="true"></div>
+
+    <div class="readout-clip" aria-hidden="true">
+      <div class="readout" id="readout" role="status">CATCH22 &gt; READY</div>
+    </div>
+
+    <div class="transport">
+      <button class="key-hit" id="btnRew" type="button" aria-label="Назад на 3 секунды"><span class="key-glow" aria-hidden="true"></span></button>
+      <button class="key-hit key-play" id="btnPlay" type="button" aria-label="Играть" aria-pressed="false"><span class="key-glow" aria-hidden="true"></span></button>
+      <button class="key-hit" id="btnFwd" type="button" aria-label="Вперёд на 3 секунды"><span class="key-glow" aria-hidden="true"></span></button>
+      <button class="key-hit" id="btnStop" type="button" aria-label="Стоп"><span class="key-glow" aria-hidden="true"></span></button>
+      <button class="key-hit" id="btnPause" type="button" aria-label="Пауза"><span class="key-glow" aria-hidden="true"></span></button>
+    </div>
+
+    <div class="vol-hit" id="volTrack" role="slider" aria-label="Громкость"
+         aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" tabindex="0">
+      <div class="vol-marker" id="volMarker" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <div class="info-panel" aria-label="Дата и место">
+    <div><span class="info-big">23.10</span><span class="info-sub">СБОР ГОСТЕЙ — 20:00</span></div>
+    <div><span class="info-big">CATCH 22</span><i class="info-dash" aria-hidden="true"></i><span class="info-sub">НАБ. ФОНТАНКИ, 86</span></div>
+    <div><span class="info-sub">ПЕРЕВЕРНИ ПЛАСТИНКУ</span><span class="info-big">SIDE B ★</span></div>
+  </div>
+  <div class="serial"><span>CATCH 22 © MMXXV</span><span>365 DAYS ON REPEAT</span></div>
+</main>
+<div class="soundwall" id="soundwall"><button type="button" id="unlockBtn">ВКЛЮЧИТЬ ЗВУК</button></div>
+<audio id="track" src="assets/hbd.mp3" loop preload="auto" playsinline></audio>
+
+<script>
+(function () {
+  'use strict';
+
+  var player   = document.getElementById('player');
+  var readout  = document.getElementById('readout');
+  var btnPlay  = document.getElementById('btnPlay');
+  var btnPause = document.getElementById('btnPause');
+  var btnStop  = document.getElementById('btnStop');
+  var btnRew   = document.getElementById('btnRew');
+  var btnFwd   = document.getElementById('btnFwd');
+  var volTrack = document.getElementById('volTrack');
+  var volMarker = document.getElementById('volMarker');
+  var wall     = document.getElementById('soundwall');
+  var unlock   = document.getElementById('unlockBtn');
+
+  var MARQUEE = ' * ПЕРВЫЙ ГОД CATCH 22 ЗАПИСАН — ПОРА ПЕРЕВЕРНУТЬ ПЛАСТИНКУ' +
+    ' * 23 ОКТЯБРЯ ОТМЕЧАЕМ ДЕНЬ РОЖДЕНИЯ И ЗОВЁМ ДРУЗЕЙ — ВЫ В СПИСКЕ' +
+    ' * СБОР ГОСТЕЙ — 20:00 * НАБ. ФОНТАНКИ, 86 * ХРАНИТЬ. НЕ ПЕРЕЗАПИСЫВАТЬ *';
+
+  /* ---------- звук ---------- */
+  var track = document.getElementById('track');
+  var volume = 0.75;
+  var audioBroken = false;
+  var wantPlay = false;
+
+  track.volume = volume;
+  track.load();
+
+  function setReadout(text, marquee) {
+    readout.textContent = text;
+    readout.classList.toggle('marquee', !!marquee);
+    readout.classList.remove('marquee-run');
+    if (marquee) {
+      /* перезапуск анимации бегущей строки */
+      void readout.offsetWidth;
+      readout.classList.add('marquee-run');
+    }
+  }
+
+  function uiPlaying(on) {
+    player.classList.toggle('is-playing', on);
+    btnPlay.classList.toggle('on', on);
+    btnPause.classList.toggle('on', false);
+    btnPlay.setAttribute('aria-pressed', String(on));
+    btnPlay.setAttribute('aria-label', on ? 'Пауза' : 'Играть');
+    if (on) setReadout(MARQUEE, true);
+    else    setReadout('CATCH22 > READY', false);
+  }
+
+  function tryPlay() {
+    var p = track.play();
+    if (p && p.catch) {
+      p.catch(function (err) {
+        uiPlaying(false);
+        if (err && err.name === 'NotAllowedError') wall.classList.add('show');
+        else if (audioBroken) startFallback();
+      });
+    }
+  }
+
+  function play() {
+    wantPlay = true;
+    if (audioBroken) { startFallback(); return; }
+    tryPlay();
+  }
+
+  function pause() {
+    wantPlay = false;
+    track.pause();
+    stopFallback();
+    uiPlaying(false);
+  }
+
+  function stop() {
+    wantPlay = false;
+    track.pause();
+    try { track.currentTime = 0; } catch (e) {}
+    stopFallback();
+    uiPlaying(false);
+  }
+
+  btnPlay.addEventListener('click', function () {
+    wall.classList.remove('show');
+    if (player.classList.contains('is-playing')) pause(); else play();
+  });
+  btnPause.addEventListener('click', function () {
+    wall.classList.remove('show');
+    if (player.classList.contains('is-playing')) pause();
+  });
+  btnStop.addEventListener('click', function () {
+    stop();
+    flash('[ STOP ]');
+  });
+  btnRew.addEventListener('click', function () {
+    try { track.currentTime = Math.max(0, track.currentTime - 3); } catch (e) {}
+    flash('<< REW 3S');
+  });
+  btnFwd.addEventListener('click', function () {
+    try { track.currentTime = Math.min(track.duration || 0, track.currentTime + 3); } catch (e) {}
+    flash('FF 3S >>');
+  });
+
+  var flashTimer = null;
+  function flash(msg) {
+    setReadout(msg, false);
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(function () {
+      if (!volTimer) uiPlaying(player.classList.contains('is-playing'));
+    }, 900);
+  }
+
+  /* UI синхронен с реальным состоянием аудио */
+  track.addEventListener('playing', function () { uiPlaying(true); });
+  track.addEventListener('pause',   function () { if (!fb.playing) uiPlaying(false); });
+  track.addEventListener('ended',   function () { uiPlaying(false); });
+
+  track.addEventListener('error', function () {
+    audioBroken = true;
+    if (player.classList.contains('is-playing')) startFallback();
+  });
+
+  unlock.addEventListener('click', function () {
+    wall.classList.remove('show');
+    play();
+  });
+
+  /* ---------- запасной синтезатор, если mp3 не загрузился ---------- */
+  var fb = { ctx: null, timer: null, playing: false };
+  var NOTE = {'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'A#4':466.16,'B4':493.88,'C5':523.25,'D5':587.33};
+  var MEL = [
+    ['C4',.3],['C4',.15],['D4',.45],['C4',.45],['F4',.45],['E4',.9],
+    ['C4',.3],['C4',.15],['D4',.45],['C4',.45],['G4',.45],['F4',.9],
+    ['C4',.3],['C4',.15],['C5',.45],['A4',.45],['F4',.45],['E4',.45],['D4',.9],
+    ['A#4',.3],['A#4',.15],['A4',.45],['F4',.45],['G4',.45],['F4',.9]
+  ];
+
+  function fbNote(freq, at, dur) {
+    if (!fb.ctx) return;
+    var o = fb.ctx.createOscillator(), g = fb.ctx.createGain();
+    o.type = 'triangle';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(0.16, at + 0.02);
+    g.gain.setValueAtTime(0.16, at + Math.max(0.06, dur - 0.05));
+    g.gain.linearRampToValueAtTime(0, at + dur);
+    o.connect(g); g.connect(fb.ctx.destination);
+    o.start(at); o.stop(at + dur + 0.02);
+  }
+
+  function fbLoop() {
+    if (!fb.playing || !fb.ctx) return;
+    var t = fb.ctx.currentTime + 0.12, total = 0;
+    for (var i = 0; i < MEL.length; i++) {
+      fbNote(NOTE[MEL[i][0]], t, MEL[i][1]);
+      t += MEL[i][1] + 0.05;
+      total += MEL[i][1] + 0.05;
+    }
+    fb.timer = setTimeout(fbLoop, total * 1000 + 400);
+  }
+
+  function startFallback() {
+    try {
+      if (!fb.ctx) fb.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (fb.ctx.state === 'suspended') fb.ctx.resume();
+    } catch (e) { return; }
+    if (fb.playing) return;
+    fb.playing = true;
+    uiPlaying(true);
+    fbLoop();
+  }
+
+  function stopFallback() {
+    fb.playing = false;
+    clearTimeout(fb.timer);
+  }
+
+  /* ---------- громкость: перетаскивание по шкале справа ---------- */
+  var volTimer = null;
+
+  function volBar(v) {
+    var n = 10, on = Math.round(v * n), s = '';
+    for (var i = 0; i < n; i++) s += (i < on ? '#' : '-');
+    return 'VOL ' + s + ' ' + Math.round(v * 100) + '%';
+  }
+
+  /* шкала VOLUME внутри зоны .vol-hit (230px высоты в фото):
+     100% — отметка 395px (23.9% зоны), 0% — отметка 550px (91.3% зоны) */
+  var VOL_TOP = 23.9, VOL_SPAN = 67.4;
+
+  function setVolume(v, showReadout) {
+    volume = Math.max(0, Math.min(1, v));
+    track.volume = volume;
+    volTrack.setAttribute('aria-valuenow', Math.round(volume * 100));
+    volMarker.style.top = (VOL_TOP + (1 - volume) * VOL_SPAN) + '%';
+    if (showReadout) {
+      setReadout(volBar(volume), false);
+      clearTimeout(volTimer);
+      volTimer = setTimeout(function () {
+        volTimer = null;
+        uiPlaying(player.classList.contains('is-playing'));
+      }, 1200);
+    }
+  }
+
+  function volumeFromY(clientY) {
+    var r = volTrack.getBoundingClientRect();
+    var t = (clientY - r.top) / r.height * 100; /* % внутри зоны */
+    setVolume((VOL_TOP + VOL_SPAN - t) / VOL_SPAN, true);
+  }
+
+  var dragging = false;
+  volTrack.addEventListener('pointerdown', function (e) {
+    dragging = true;
+    if (volTrack.setPointerCapture) volTrack.setPointerCapture(e.pointerId);
+    volumeFromY(e.clientY);
+    e.preventDefault();
+  });
+  volTrack.addEventListener('pointermove', function (e) { if (dragging) volumeFromY(e.clientY); });
+  volTrack.addEventListener('pointerup',   function () { dragging = false; });
+  volTrack.addEventListener('pointercancel', function () { dragging = false; });
+  volTrack.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    setVolume(volume + (e.deltaY < 0 ? 0.05 : -0.05), true);
+  }, { passive: false });
+  volTrack.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowUp')   { setVolume(volume + 0.05, true); e.preventDefault(); }
+    if (e.key === 'ArrowDown') { setVolume(volume - 0.05, true); e.preventDefault(); }
+  });
+
+  setVolume(0.75, false);
+  setReadout('CATCH22 > READY', false);
+
+  /* Прогрев аудио первым жестом вне транспорта (iOS/Safari):
+     play() из пользовательского жеста разрешает последующий play() из кода. */
+  var primed = false;
+  function prime(e) {
+    if (primed || audioBroken) return;
+    if (e && e.target && e.target.closest && e.target.closest('.key-hit, .vol-hit, .soundwall')) return;
+    primed = true;
+    var prev = track.volume;
+    track.volume = 0;
+    var restore = function (keepPlaying) {
+      return function () {
+        if (!keepPlaying && !wantPlay) { track.pause(); try { track.currentTime = 0; } catch (err) {} }
+        track.volume = prev;
+      };
+    };
+    var p = track.play();
+    if (p && p.then) p.then(restore(false), restore(true));
+    else restore(true)();
+  }
+  ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
+    window.addEventListener(ev, prime, { passive: true });
+  });
+})();
+</script>
+</body>
+</html>
