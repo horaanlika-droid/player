@@ -9,6 +9,21 @@
 <link rel="stylesheet" href="assets/player.css">
 </head>
 <body>
+<!-- фильтр «печатной» краски для надписи на бумажной наклейке: неровная плотность,
+     зерно и микро-растекание по волокну бумаги -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="print-ink" x="-5%" y="-20%" width="110%" height="140%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="22" result="grain"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.035 0.09" numOctaves="3" seed="5" result="blotch"/>
+    <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.6 0 0 0 2.3" result="grainMask"/>
+    <feColorMatrix in="blotch" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 -1.1 0 0 1.45" result="blotchMask"/>
+    <feComposite in="grainMask" in2="blotchMask" operator="in" result="density"/>
+    <feGaussianBlur in="SourceAlpha" stdDeviation="0.25" result="soft"/>
+    <feComposite in="soft" in2="density" operator="in" result="inked"/>
+    <feFlood flood-color="#392c21" result="ink"/>
+    <feComposite in="ink" in2="inked" operator="in"/>
+  </filter>
+</svg>
 <main class="scene">
   <div class="invite-copy visually-hidden">
     <h1>Первый год Catch 22 записан — пора перевернуть пластинку!</h1>

@@ -40,10 +40,10 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .glass { position: absolute; left: 24%; width: 50%; top: 27.5%; height: 15.5%; z-index: 3; border-radius: 3cqw; pointer-events: none; background: linear-gradient(110deg, #d9d0b00d, transparent 32%, #d9d0b00e 51%, transparent 56%); }
 
 /* Бумажная наклейка на кассете: мелкий печатный текст пиксельным шрифтом */
-.cassette-label { position: absolute; left: 19%; width: 58%; top: 21.6%; height: 7.7%; z-index: 4; display: flex; align-items: center; justify-content: center; margin: 0; color: #392c21; font: 400 2.75cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; text-align: center; mix-blend-mode: multiply; opacity: .9; transform: rotate(-.8deg); text-shadow: 0 .12cqw #f2e4c455; pointer-events: none; }
+.cassette-label { position: absolute; left: 19%; width: 58%; top: 21.6%; height: 7.7%; z-index: 4; display: flex; align-items: center; justify-content: center; margin: 0; color: #392c21; font: 400 2.75cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; text-align: center; mix-blend-mode: multiply; opacity: .92; transform: rotate(-.8deg); pointer-events: none; /* печать: неровная краска, зерно и растекание (фильтр #print-ink в index.html) */ filter: url(#print-ink); }
 
 /* Печатное «catch» внутри красного сердечка на стикере «I ♥ 22» */
-.heart-tag { position: absolute; left: 78.86%; top: 36.2%; transform: translate(-50%, -50%); z-index: 4; margin: 0; color: #f2e6cd; font: 400 1.28cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .015em; white-space: nowrap; pointer-events: none; text-shadow: 0 .1cqw #7d0f0f55; opacity: .95; }
+.heart-tag { position: absolute; left: 78.86%; top: 36.4%; transform: translate(-50%, -50%) rotate(-4deg); z-index: 4; margin: 0; color: #fff3de; font: 700 2.15cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; pointer-events: none; text-shadow: 0 .12cqw #5a0a0a99; opacity: 1; }
 
 /* ---------- дисплей: бегущая строка пиксельным шрифтом ---------- */
 /* окно строки = стекло ЖК-дисплея: 18.6%..78.0% по ширине фото, плюс мягкое
