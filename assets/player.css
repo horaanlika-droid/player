@@ -9,17 +9,23 @@
 
 * { box-sizing: border-box; }
 :root { --paper: #c6c0ae; --orange: #ce7c32; --lcd-ink: #2a3320; }
-html { -webkit-text-size-adjust: 100%; background: #000; }
+html { -webkit-text-size-adjust: 100%; background: #000; color-scheme: dark; }
 body { margin: 0; background: #000; color: var(--paper); font-family: 'Courier New', Courier, monospace; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 button { font: inherit; }
 
-/* Амбиент: глубокий чёрный фон, фото-плеер — отдельным объектом. */
+/* Амбиент: тот же тон и то же зерно, что на чёрных краях фото, — фон вокруг
+   плеера продолжается на весь оставшийся экран (iPad, десктоп) без стыка. */
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background-color: #000; background-image: radial-gradient(125% 100% at 50% 42%, #0000 52%, #000000b3 100%), url('layers/noise.png'); background-repeat: no-repeat, repeat; background-size: cover, auto; }
+
+/* фото-плеер — отдельным объектом по центру оставшегося экрана */
 .scene { max-width: 640px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; padding: max(34px, env(safe-area-inset-top)) 20px max(40px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; justify-content: center; }
 
 .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* ---------- устройство: фото-панель, поверх — бобины, наклейка, дисплей, клавиши ---------- */
-.device { position: relative; width: 100%; max-width: 500px; margin: 0 auto; aspect-ratio: 1024 / 1536; container-type: inline-size; isolation: isolate; filter: drop-shadow(0 30px 60px #000d) drop-shadow(0 6px 16px #000b); }
+/* высота плеера — не больше 72% высоты окна: вокруг всегда остаётся фон
+   (важно на iPad и в ландшафте, где раньше плеер упирался в края экрана) */
+.device { position: relative; width: min(500px, 100%, calc(72vh * 2 / 3)); width: min(500px, 100%, calc(72dvh * 2 / 3)); margin: 0 auto; aspect-ratio: 1024 / 1536; container-type: inline-size; isolation: isolate; filter: drop-shadow(0 30px 60px #000d) drop-shadow(0 6px 16px #000b); }
 .plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
 
 /* Бобины, вырезанные из IMG_1468.png: вращаются только при игре */
@@ -33,15 +39,20 @@ button { font: inherit; }
 /* блик на стекле кассетного окна */
 .glass { position: absolute; left: 24%; width: 50%; top: 27.5%; height: 15.5%; z-index: 3; border-radius: 3cqw; pointer-events: none; background: linear-gradient(110deg, #d9d0b00d, transparent 32%, #d9d0b00e 51%, transparent 56%); }
 
-/* Бумажная наклейка на кассете с детской рукописной надписью */
-.cassette-label { position: absolute; left: 19%; width: 58%; top: 21.6%; height: 7.7%; z-index: 4; display: flex; align-items: center; justify-content: center; margin: 0; color: #392c21; font: 400 9cqw/.95 'Neucha', 'Chalkboard SE', 'Comic Sans MS', cursive; letter-spacing: .015em; white-space: nowrap; text-align: center; mix-blend-mode: multiply; opacity: .9; transform: rotate(-1.2deg); text-shadow: 0 .15cqw #f2e4c455; pointer-events: none; }
+/* Бумажная наклейка на кассете: мелкий печатный текст пиксельным шрифтом */
+.cassette-label { position: absolute; left: 19%; width: 58%; top: 21.6%; height: 7.7%; z-index: 4; display: flex; align-items: center; justify-content: center; margin: 0; color: #392c21; font: 400 2.75cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; text-align: center; mix-blend-mode: multiply; opacity: .9; transform: rotate(-.8deg); text-shadow: 0 .12cqw #f2e4c455; pointer-events: none; }
+
+/* Печатное «catch» внутри красного сердечка на стикере «I ♥ 22» */
+.heart-tag { position: absolute; left: 78.86%; top: 36.2%; transform: translate(-50%, -50%); z-index: 4; margin: 0; color: #f2e6cd; font: 400 1.28cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .015em; white-space: nowrap; pointer-events: none; text-shadow: 0 .1cqw #7d0f0f55; opacity: .95; }
 
 /* ---------- дисплей: бегущая строка пиксельным шрифтом ---------- */
-.readout-clip { position: absolute; left: 17%; width: 63%; top: 62.2%; height: 8.8%; z-index: 3; overflow: hidden; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+/* окно строки = стекло ЖК-дисплея: 18.6%..78.0% по ширине фото, плюс мягкое
+   затухание у краёв — буквы больше не залезают на корпус плеера */
+.readout-clip { position: absolute; left: 18.6%; width: 59.4%; top: 61.8%; height: 8.8%; z-index: 3; overflow: hidden; display: flex; align-items: center; justify-content: center; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, #0000 0, #000 1.3cqw, #000 calc(100% - 1.3cqw), #0000 100%); mask-image: linear-gradient(90deg, #0000 0, #000 1.3cqw, #000 calc(100% - 1.3cqw), #0000 100%); }
 .readout { display: block; width: 100%; font: 700 3.5cqw/1 'Handjet', 'Courier New', monospace; letter-spacing: .04em; color: var(--lcd-ink); white-space: nowrap; text-align: center; text-shadow: 0 1px 0 #ffffff14; }
 .readout.marquee { width: max-content; flex: 0 0 auto; text-align: left; }
 .readout.marquee-run { animation: marquee 30s linear infinite; }
-@keyframes marquee { from { transform: translateX(calc(50% + 31.5cqw)); } to { transform: translateX(calc(-50% - 31.5cqw)); } }
+@keyframes marquee { from { transform: translateX(calc(50% + 29.7cqw)); } to { transform: translateX(calc(-50% - 29.7cqw)); } }
 
 /* ---------- транспорт: прозрачные зоны поверх клавиш фото ---------- */
 .transport { position: absolute; left: 0; right: 0; top: 44.8%; height: 13%; z-index: 5; }
@@ -68,9 +79,18 @@ button { font: inherit; }
 @media (max-width: 380px) {
   .scene { padding-left: 12px; padding-right: 12px; }
 }
-@media (max-width: 600px) and (orientation: portrait) {
+@media (max-width: 600px) and (orientation: portrait) and (min-aspect-ratio: 5/12) {
+  /* только настоящий телефон: у высоких узких окон (iPad Split View / Slide
+     Over) правило не срабатывает и остаётся масштаб с полями фона */
   .scene { max-width: none; height: 100dvh; min-height: 100dvh; padding: max(8px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom)); overflow: hidden; align-items: center; }
+  /* как и раньше: плеер занимает почти весь экран телефона, поля — само чёрное
+     поле фотографии; для экстремально узких окон правило не срабатывает
+     (см. min-aspect-ratio выше) */
   .device { width: min(500px, 52dvh); max-width: none; flex-shrink: 0; }
+}
+/* планшет и десктоп: плеер не раздувается на всю высоту, фон виден со всех сторон */
+@media (min-width: 601px), (max-width: 600px) and (orientation: landscape), (max-width: 600px) and (orientation: portrait) and (max-aspect-ratio: 5/12) {
+  .scene { padding: max(28px, env(safe-area-inset-top)) 24px max(34px, env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
