@@ -65,7 +65,28 @@ button { font: inherit; }
    затухание у краёв — буквы больше не залезают на корпус плеера */
 .readout-clip { position: absolute; left: 18.6%; width: 59.4%; top: 61.8%; height: 8.8%; z-index: 3; overflow: hidden; display: flex; align-items: center; justify-content: center; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, #0000 0, #000 1.3cqw, #000 calc(100% - 1.3cqw), #0000 100%); mask-image: linear-gradient(90deg, #0000 0, #000 1.3cqw, #000 calc(100% - 1.3cqw), #0000 100%); }
 .readout { display: block; width: 100%; font: 700 3.5cqw/1 'Handjet', 'Courier New', monospace; letter-spacing: .04em; color: var(--lcd-ink); -webkit-text-stroke: .04cqw var(--lcd-ink); white-space: nowrap; text-align: center; text-shadow: 0 0 .28cqw rgba(9, 14, 5, .72), .16cqw .24cqw .32cqw rgba(6, 10, 3, .45), 0 1px 0 rgba(210, 224, 180, .16); filter: blur(.085cqw) contrast(1.18); }
-.readout.marquee { width: max-content; flex: 0 0 auto; text-align: left; /* бегущая строка крупнее строки состояния и слегка прозрачная */ font-size: 4.4cqw; opacity: .78; }
+/* Текст приглашения — не сплошной набор, а светящиеся точки ЖК-матрицы.
+   Рисунок обрезается по контуру букв: каждая буква собирается из ровной
+   сетки круглых пикселей, как на референсе, при этом сохраняет тёмный
+   оливковый «чернильный» цвет этого плеера, а не чужой неоновый оттенок. */
+.readout.marquee {
+  width: max-content;
+  flex: 0 0 auto;
+  text-align: left;
+  font-size: 4.7cqw;
+  letter-spacing: .055em;
+  opacity: .92;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  background-image: radial-gradient(circle at center, #11190a 0 .105cqw, #11190ab3 .12cqw, transparent .155cqw);
+  background-position: .04cqw .04cqw;
+  background-size: .46cqw .46cqw;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(.05cqw .10cqw .10cqw rgba(6, 10, 3, .5));
+}
 .readout.marquee-run { animation: marquee 30s linear infinite; }
 @keyframes marquee { from { transform: translateX(calc(50% + 29.7cqw)); } to { transform: translateX(calc(-50% - 29.7cqw)); } }
 
