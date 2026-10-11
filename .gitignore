@@ -1,0 +1,13 @@
+# Node.js / BotHost
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Python-инструменты из tools/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# система
+.DS_Store
