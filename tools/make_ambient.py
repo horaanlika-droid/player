@@ -10,7 +10,7 @@
    lag 2 ≈ 0.11). За счёт периодичности БПФ тайл стыкуется без швов.
 2. Обновляет `assets/layers/plate.webp` (1024x1536 RGBA): корпус плеера,
    боковой блок регуляторов и штекер наушников остаются полностью непрозрачными
-   (alpha = 255), а внешние поля кадра вокруг силуэта плеера плавно сводятся
+   (alpha = 255; провод штекера доходит до верхнего края кадра), а внешние поля кадра вокруг силуэта плеера плавно сводятся
    к alpha = 0 (cubic smoothstep на полосе ~36 px) с выравниванием тона
    к базовому фону. В результате у картинки исчезает прямоугольная граница
    1024x1536, а CSS drop-shadow на `.device` ложится по реальному силуэту
@@ -112,9 +112,12 @@ def build_plate(src: np.ndarray, out_path: str) -> None:
     d_side = sd_round_rect(xx, yy, 890, 234, 1001, 1142, 16)
     d_plug_barrel = sd_round_rect(xx, yy, 139, 26, 212, 120, 20)
     d_plug_tip = sd_round_rect(xx, yy, 158, 2, 197, 45, 10)
+    # Провод штекера уходит до самого верхнего края кадра (y=0), поэтому
+    # отдельная колонка-прямоугольник продолжает силуэт вверх за границу кадра
+    d_plug_cord = sd_round_rect(xx, yy, 156, -40, 201, 40, 6)
     d_player = np.minimum(
         np.minimum(d_body, d_side),
-        np.minimum(d_plug_barrel, d_plug_tip),
+        np.minimum(np.minimum(d_plug_barrel, d_plug_tip), d_plug_cord),
     )
 
     d_edge = np.minimum(np.minimum(xx, w - 1 - xx), np.minimum(yy, h - 1 - yy))
@@ -122,16 +125,10 @@ def build_plate(src: np.ndarray, out_path: str) -> None:
     t_edge = np.clip((d_edge - 2.0) / 18.0, 0.0, 1.0)
     t = t_halo * t_edge
     alpha_f = t * t * (3.0 - 2.0 * t)
+    alpha_f = np.where(d_plug_cord <= 0.0, 1.0, alpha_f)
     alpha = np.round(alpha_f * 255.0).astype(np.uint8)
 
     src_mod = src.copy()
-    # Мягкое угасание самого верхнего среза провода штекера (y=0..14), чтобы не было
-    # горизонтального обрыва у верхнего края кадра
-    plug_fade = np.clip((yy - 2.0) / 12.0, 0.0, 1.0)[:, :, None]
-    src_mod[:16, 150:205, :] = (
-        src_mod[:16, 150:205, :] * plug_fade[:16, 150:205, :]
-        + BASE_RGB * (1.0 - plug_fade[:16, 150:205, :])
-    )
     # В зоне полного растворения фиксируем базовый тон, чтобы WebP не давал ореолов
     src_mod[alpha == 0] = BASE_RGB
 
