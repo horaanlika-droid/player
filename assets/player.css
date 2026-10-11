@@ -24,7 +24,7 @@ html {
   background-position: center, left top;
   background-size: cover, 256px 256px;
 }
-body { min-height: 100vh; min-height: 100dvh; margin: 0; background: transparent; color: var(--paper); font-family: 'Courier New', Courier, monospace; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+body { position: relative; min-height: 100vh; min-height: 100dvh; margin: 0; background: transparent; color: var(--paper); font-family: 'Courier New', Courier, monospace; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 button { font: inherit; }
 
 /* фото-плеер — отдельным объектом по центру оставшегося экрана */
@@ -60,8 +60,8 @@ button { font: inherit; }
    glyph-массу — лента машинки пробивает жирнее, чем экранная кегль. */
 .cassette-label { position: absolute; left: 19%; width: 58%; top: 21.9%; height: 6.1%; z-index: 4; display: grid; place-items: center; margin: 0; color: #140e09; font: 400 4.3cqw/1 'Special Elite', 'Courier New', Courier, monospace; white-space: nowrap; text-align: center; -webkit-text-stroke: .06cqw #140e09; text-shadow: 0 0 .14cqw #140e0966; mix-blend-mode: multiply; opacity: 1; transform: rotate(-.8deg); pointer-events: none; /* печать: неровная краска, зерно и растекание (фильтр #print-ink в index.html) */ filter: url(#print-ink); }
 
-/* Чёрное печатное «catch» внутри красного сердечка на стикере «I ♥ 22» */
-.heart-tag { position: absolute; left: 78.86%; top: 36.4%; transform: translate(-50%, -50%) rotate(-4deg); z-index: 4; margin: 0; color: #000; font: 700 2.15cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; pointer-events: none; text-shadow: 0 .12cqw #5a0a0a55; opacity: 1; }
+/* Наклейка «1 YEAR! CATCH 22» с бокалом, вырезанная из IMG_1448.jpeg. */
+.goblet-sticker { position: absolute; left: 69.14%; top: 33.59%; width: 14.36%; height: auto; z-index: 4; display: block; pointer-events: none; filter: drop-shadow(.15cqw .3cqw .3cqw #0009); }
 
 /* ---------- дисплей: бегущая строка пиксельным шрифтом ---------- */
 /* окно строки = стекло ЖК-дисплея: 18.6%..78.0% по ширине фото, плюс мягкое
@@ -80,13 +80,21 @@ button { font: inherit; }
 #btnFwd   { left: 42.58%; width: 13.28%; }
 #btnStop  { left: 56.35%; width: 12.01%; }
 #btnPause { left: 68.85%; width: 13.48%; }
-/* Светится только тонкая красная полоска PLAY — не вся клавиша. */
-.play-indicator { position: absolute; left: 22%; width: 55%; bottom: 9.2%; height: 3.5%; border-radius: 99px; background: #f04420; opacity: 0; pointer-events: none; transition: opacity .15s, box-shadow .15s; }
-.key-play.on .play-indicator, .key-play:active .play-indicator { opacity: .95; box-shadow: 0 0 2.8cqw #f0442090, 0 0 .8cqw #ff6d3480; }
+/* Лампочка PLAY мигает до первого нажатия на клавишу, затем горит ровно.
+   Тёмная фаза закрывает красную полоску, уже отпечатанную на фото. */
+.play-indicator { position: absolute; left: 22%; width: 55%; bottom: 9.2%; height: 3.5%; border-radius: 99px; background: #f04420; pointer-events: none; animation: lamp-blink 1s step-end infinite; }
+@keyframes lamp-blink {
+  0%, 49% { background: #f04420; box-shadow: 0 0 2.8cqw #f0442090, 0 0 .8cqw #ff6d3480; }
+  50%, 100% { background: #190d0b; box-shadow: none; }
+}
+.lamp-latched .play-indicator { animation: none; background: #e63b1e; box-shadow: none; }
 .key-hit:focus-visible, .vol-hit:focus-visible, .soundwall button:focus-visible { outline: 2px solid #ccae78; outline-offset: 3px; }
 
 /* ---------- громкость: невидимая зона управления над шкалой VOLUME справа ---------- */
 .vol-hit { position: absolute; left: 87.4%; right: 0; top: 22.1%; height: 15%; z-index: 5; cursor: ns-resize; touch-action: none; }
+
+/* Почти незаметная подпись у нижнего края страницы, в том числе в safe area. */
+.credit { position: absolute; inset-inline: 0; bottom: max(8px, env(safe-area-inset-bottom)); color: #817d70; opacity: .55; text-align: center; font: 10px/1.2 'Courier New', Courier, monospace; letter-spacing: .04em; pointer-events: none; }
 
 /* ---------- звук-волл ---------- */
 .soundwall { position: fixed; inset: 0; z-index: 20; background: #080a08c9; backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; }
@@ -112,6 +120,7 @@ button { font: inherit; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  .play-indicator { background: #e63b1e; }
   .readout-clip.marquee-active { justify-content: flex-start; }
   .readout.marquee-run { transform: none; }
 }
