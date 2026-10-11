@@ -17,6 +17,11 @@
  *
  * Что умеет:
  *   • отдаёт index.html и assets/** как обычная статика;
+ *   • автобустинга кэша: в html/css ссылки на ассеты переписываются на лету
+ *     в `?v=<хэш-содержимого>` — после изменения файла URL меняется сам,
+ *     браузер/CDN не могут подхватить старую копию, бампать версии руками
+ *     больше не нужно (и не нужно ничего добавлять в .gitignore — он на кэш
+ *     не влияет);
  *   • поддержка Range — Safari на iPad перематывает mp3 только с ней;
  *   • ETag / Last-Modified → 304, чтобы повторные заходы не тянули 330 КБ mp3;
  *   • gzip для html/css/js, длинный Cache-Control для assets;
@@ -27,11 +32,16 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const crypto = require('crypto');
 
 const ROOT = __dirname;
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number.parseInt(process.env.PORT || '3000', 10) || 3000;
 const STARTED_AT = Date.now();
+
+// метка сборки: видна в /health и в заголовке X-App-Version ответов html —
+// по ней сразу видно, какая версия живёт на хосте
+const APP_VERSION = '2026-10-11';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -67,7 +77,9 @@ const COMPRESSIBLE = /^(text\/|application\/(javascript|json|manifest\+json)|ima
 const MIN_GZIP = 1024; // мелочь быстрее отдать как есть
 const CACHE_IMMUTABLE = 'public, max-age=31536000, immutable'; // ассеты с ?v=
 const CACHE_ASSET = 'public, max-age=86400';                  // прочие ассеты
-const CACHE_HTML = 'no-cache';                                // страница всегда свежая
+// html — всегда свежий: иначе CDN/браузер показывает старую страницу
+// со старыми ссылками ?v=, и никакой бустинг ассетов уже не поможет
+const CACHE_HTML = 'no-cache, no-store, must-revalidate';
 
 const NOT_FOUND_PAGE = `<!DOCTYPE html>
 <html lang="ru"><head><meta charset="UTF-8">
@@ -140,10 +152,10 @@ function etagOf(stat) {
   return `"${stat.size.toString(16)}-${Math.floor(stat.mtimeMs).toString(16)}"`;
 }
 
-function cacheControlFor(urlPath) {
-  if (urlPath.indexOf('?v=') !== -1) return CACHE_IMMUTABLE;
-  const ext = path.extname(urlPath).toLowerCase();
+function cacheControlFor(urlPath, ext) {
+  // html всегда свежий, даже если ему прислали ?v= — иначе его закэшируют
   if (ext === '.html' || ext === '') return CACHE_HTML;
+  if (urlPath.indexOf('?v=') !== -1) return CACHE_IMMUTABLE;
   return CACHE_ASSET;
 }
 
@@ -170,6 +182,118 @@ function parseRange(header, size) {
   return { start, end };
 }
 
+/* ──────────── автоверсии ассетов (cache busting по хэшу) ──────────── */
+
+// Ручные ?v=N в разметке больше не управляют кэшем: перед отдачей html/css
+// сервер заменяет query каждой локальной ссылки на ?v=<sha1-содержимого>.
+// Файл изменился → хэш изменился → URL изменился → браузер и CDN берут
+// свежую копию. Хэш html/css считается по УЖЕ переписанному тексту, поэтому
+// смена шрифта или картинки автоматически обновляет и ссылку на css.
+
+const REF_ATTR_RE = /\b(src|href)\s*=\s*("([^"]*)"|'([^']*)')/gi; // html
+const REF_URL_RE = /url\(\s*("([^"]*)"|'([^']*)'|([^"')][^)]*))\s*\)/gi; // css
+
+function sha1hex(buf) {
+  return crypto.createHash('sha1').update(buf).digest('hex');
+}
+
+// abs → { key: 'size:mtime', ver }: не перечитываем файлы на каждый запрос
+const versionCache = new Map();
+
+// версия файла для URL: sha1 содержимого (10 hex), для html/css — уже
+// переписанного. seen защищает от циклических ссылок.
+async function fileVersion(abs, stat, seen) {
+  const key = `${stat.size}:${Math.floor(stat.mtimeMs)}`;
+  const hit = versionCache.get(abs);
+  if (hit && hit.key === key) return hit.ver;
+
+  const ext = path.extname(abs).toLowerCase();
+  let ver;
+  if ((ext === '.html' || ext === '.css') && !seen.has(abs)) {
+    seen.add(abs);
+    const raw = await fs.promises.readFile(abs, 'utf8');
+    const out = await rewriteRefs(raw, abs, seen);
+    ver = sha1hex(Buffer.from(out, 'utf8')).slice(0, 10);
+  } else {
+    ver = sha1hex(await fs.promises.readFile(abs)).slice(0, 10);
+  }
+  versionCache.set(abs, { key, ver });
+  return ver;
+}
+
+// «assets/x.png?v=2#frag» → «assets/x.png?v=<хэш>#frag»; null — не трогать
+async function bumpRef(ref, fromDir, seen) {
+  if (!ref) return null;
+  if (ref.startsWith('#') || ref.startsWith('//')) return null;
+  if (/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(ref)) return null; // http:, data:, mailto:
+
+  let frag = '';
+  const hashIdx = ref.indexOf('#');
+  if (hashIdx !== -1) {
+    frag = ref.slice(hashIdx);
+    ref = ref.slice(0, hashIdx);
+  }
+  const qIdx = ref.indexOf('?');
+  const pure = qIdx === -1 ? ref : ref.slice(0, qIdx);
+  if (pure === '') return null;
+
+  let abs;
+  if (pure.startsWith('/')) {
+    abs = resolvePath(pure);
+  } else {
+    const rel = path.relative(ROOT, path.resolve(fromDir, pure));
+    if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) return null;
+    abs = resolvePath('/' + rel.split(path.sep).join('/'));
+  }
+  if (abs == null) return null;
+
+  let stat;
+  try {
+    stat = await fs.promises.stat(abs);
+  } catch {
+    return null;
+  }
+  if (!stat.isFile()) return null;
+
+  const ver = await fileVersion(abs, stat, seen);
+  return `${pure}?v=${ver}${frag}`;
+}
+
+// переписывает src/href в html и url(...) в css; нераспознанные ссылки
+// остаются как есть
+async function rewriteRefs(text, fromAbs, seen) {
+  const isCss = path.extname(fromAbs).toLowerCase() === '.css';
+  const re = isCss ? REF_URL_RE : REF_ATTR_RE;
+  const dir = path.dirname(fromAbs);
+
+  let out = '';
+  let last = 0;
+  let m;
+  re.lastIndex = 0;
+  while ((m = re.exec(text)) !== null) {
+    let ref;
+    let quote;
+    if (isCss) {
+      if (m[2] !== undefined) { ref = m[2]; quote = '"'; }
+      else if (m[3] !== undefined) { ref = m[3]; quote = "'"; }
+      else { ref = m[4]; quote = '"'; }
+    } else {
+      if (m[3] !== undefined) { ref = m[3]; quote = '"'; }
+      else { ref = m[4]; quote = "'"; }
+    }
+
+    const next = await bumpRef(ref, dir, seen);
+    if (next == null) continue; // оставляем оригинал, last не двигаем
+
+    out += text.slice(last, m.index);
+    out += isCss
+      ? `url(${quote}${next}${quote})`
+      : `${m[1]}=${quote}${next}${quote}`;
+    last = m.index + m[0].length;
+  }
+  return out + text.slice(last);
+}
+
 /* ─────────────────────────── обработчик ─────────────────────────── */
 
 async function handle(req, res) {
@@ -187,6 +311,7 @@ async function handle(req, res) {
     const body = JSON.stringify({
       status: 'ok',
       service: 'catch22-player',
+      version: APP_VERSION,
       uptime: Math.round((Date.now() - STARTED_AT) / 1000),
       port: PORT,
     }, null, 2) + '\n';
@@ -221,9 +346,57 @@ async function handle(req, res) {
   const etag = etagOf(stat);
   const lastModified = new Date(stat.mtimeMs).toUTCString();
 
+  // html/css переписываем на лету: в ссылки подставляются хэши содержимого.
+  // ETag здесь считается по переписанному телу (а не по mtime файла), иначе
+  // изменение ассета не обновило бы закэшированную страницу.
+  if (ext === '.html' || ext === '.css') {
+    const raw = await fs.promises.readFile(abs, 'utf8');
+    const body = await rewriteRefs(raw, abs, new Set([abs]));
+    const buf = Buffer.from(body, 'utf8');
+    const outEtag = `"${sha1hex(buf).slice(0, 16)}"`;
+
+    const outHeaders = {
+      'Content-Type': type,
+      'Cache-Control': cacheControlFor(urlPath, ext),
+      ETag: outEtag,
+      'Last-Modified': lastModified,
+      'X-Content-Type-Options': 'nosniff',
+      Vary: 'Accept-Encoding',
+    };
+    if (ext === '.html') {
+      // супер-свежая страница: старый html со старыми ?v= — главный источник
+      // «на хосте подгружается старая версия»
+      outHeaders['X-App-Version'] = APP_VERSION;
+      outHeaders.Pragma = 'no-cache';
+      outHeaders.Expires = 'Thu, 01 Jan 1970 00:00:00 GMT';
+    }
+
+    // условный запрос по ETag (он покрывает и изменения зависимых ассетов)
+    const inm = req.headers['if-none-match'];
+    if (inm && inm.split(',').map((s) => s.trim()).indexOf(outEtag) !== -1) {
+      res.writeHead(304, outHeaders);
+      res.end();
+      log(req, 304, 0);
+      return;
+    }
+
+    const wantsGzip = method === 'GET' &&
+      /\bgzip\b/.test(String(req.headers['accept-encoding'] || '')) &&
+      COMPRESSIBLE.test(type) &&
+      buf.length >= MIN_GZIP;
+    const payload = wantsGzip ? zlib.gzipSync(buf) : buf;
+    if (wantsGzip) outHeaders['Content-Encoding'] = 'gzip';
+    outHeaders['Content-Length'] = payload.length;
+    res.writeHead(200, outHeaders);
+    if (method === 'HEAD') { res.end(); log(req, 200, 0); return; }
+    res.end(payload);
+    log(req, 200, payload.length, wantsGzip ? '(gzip, rewritten)' : null);
+    return;
+  }
+
   const headers = {
     'Content-Type': type,
-    'Cache-Control': cacheControlFor(urlPath),
+    'Cache-Control': cacheControlFor(urlPath, ext),
     ETag: etag,
     'Last-Modified': lastModified,
     'Accept-Ranges': 'bytes',
