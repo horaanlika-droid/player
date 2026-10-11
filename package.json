@@ -1,0 +1,20 @@
+{
+  "name": "catch22-player",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Catch 22 — приглашение-плеер: статическая страница + Node.js-сервер для деплоя на BotHost",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "bothost",
+    "static-server",
+    "invitation"
+  ],
+  "license": "UNLICENSED"
+}
