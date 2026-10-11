@@ -9,13 +9,20 @@
 
 * { box-sizing: border-box; }
 :root { --paper: #c6c0ae; --orange: #ce7c32; --lcd-ink: #2a3320; }
-html { -webkit-text-size-adjust: 100%; background: #000; color-scheme: dark; }
-body { margin: 0; background: #000; color: var(--paper); font-family: 'Courier New', Courier, monospace; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+html {
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+  /* Рисуем амбиент на корневом холсте: он заполняет и экран, и safe area
+     Safari на iPad, не обрезаясь вместе с блоком страницы. */
+  background-color: #000;
+  background-image: radial-gradient(125% 100% at 50% 42%, #0000 52%, #000000b3 100%), url('layers/noise.png');
+  background-repeat: no-repeat, repeat;
+  background-position: center, left top;
+  background-size: cover, 192px 192px;
+}
+body { min-height: 100vh; min-height: 100dvh; margin: 0; background: transparent; color: var(--paper); font-family: 'Courier New', Courier, monospace; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 button { font: inherit; }
-
-/* Амбиент: тот же тон и то же зерно, что на чёрных краях фото, — фон вокруг
-   плеера продолжается на весь оставшийся экран (iPad, десктоп) без стыка. */
-body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background-color: #000; background-image: radial-gradient(125% 100% at 50% 42%, #0000 52%, #000000b3 100%), url('layers/noise.png'); background-repeat: no-repeat, repeat; background-size: cover, auto; }
 
 /* фото-плеер — отдельным объектом по центру оставшегося экрана */
 .scene { max-width: 640px; min-height: 100vh; min-height: 100dvh; margin: 0 auto; padding: max(34px, env(safe-area-inset-top)) 20px max(40px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; justify-content: center; }
@@ -39,11 +46,11 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 /* блик на стекле кассетного окна */
 .glass { position: absolute; left: 24%; width: 50%; top: 27.5%; height: 15.5%; z-index: 3; border-radius: 3cqw; pointer-events: none; background: linear-gradient(110deg, #d9d0b00d, transparent 32%, #d9d0b00e 51%, transparent 56%); }
 
-/* Бумажная наклейка на кассете: мелкий печатный текст пиксельным шрифтом */
-.cassette-label { position: absolute; left: 19%; width: 58%; top: 21.6%; height: 7.7%; z-index: 4; display: flex; align-items: center; justify-content: center; margin: 0; color: #392c21; font: 400 2.75cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; text-align: center; mix-blend-mode: multiply; opacity: .92; transform: rotate(-.8deg); pointer-events: none; /* печать: неровная краска, зерно и растекание (фильтр #print-ink в index.html) */ filter: url(#print-ink); }
+/* Бумажная наклейка на кассете: надпись крупнее, плотнее и контрастнее */
+.cassette-label { position: absolute; left: 19%; width: 58%; top: 21.6%; height: 7.7%; z-index: 4; display: flex; align-items: center; justify-content: center; margin: 0; color: #17110c; font: 700 4cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; text-align: center; mix-blend-mode: multiply; opacity: 1; transform: rotate(-.8deg); pointer-events: none; /* печать: неровная краска, зерно и растекание (фильтр #print-ink в index.html) */ filter: url(#print-ink); }
 
-/* Печатное «catch» внутри красного сердечка на стикере «I ♥ 22» */
-.heart-tag { position: absolute; left: 78.86%; top: 36.4%; transform: translate(-50%, -50%) rotate(-4deg); z-index: 4; margin: 0; color: #fff3de; font: 700 2.15cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; pointer-events: none; text-shadow: 0 .12cqw #5a0a0a99; opacity: 1; }
+/* Чёрное печатное «catch» внутри красного сердечка на стикере «I ♥ 22» */
+.heart-tag { position: absolute; left: 78.86%; top: 36.4%; transform: translate(-50%, -50%) rotate(-4deg); z-index: 4; margin: 0; color: #000; font: 700 2.15cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; pointer-events: none; text-shadow: 0 .12cqw #5a0a0a55; opacity: 1; }
 
 /* ---------- дисплей: бегущая строка пиксельным шрифтом ---------- */
 /* окно строки = стекло ЖК-дисплея: 18.6%..78.0% по ширине фото, плюс мягкое
