@@ -60,9 +60,6 @@ button { font: inherit; }
    glyph-массу — лента машинки пробивает жирнее, чем экранная кегль. */
 .cassette-label { position: absolute; left: 19%; width: 58%; top: 21.9%; height: 6.1%; z-index: 4; display: grid; place-items: center; margin: 0; color: #140e09; font: 400 4.3cqw/1 'Special Elite', 'Courier New', Courier, monospace; white-space: nowrap; text-align: center; -webkit-text-stroke: .06cqw #140e09; text-shadow: 0 0 .14cqw #140e0966; mix-blend-mode: multiply; opacity: 1; transform: rotate(-.8deg); pointer-events: none; /* печать: неровная краска, зерно и растекание (фильтр #print-ink в index.html) */ filter: url(#print-ink); }
 
-/* Наклейка «1 YEAR! CATCH 22» с бокалом, реставрированная из IMG_1448.jpeg. */
-.goblet-sticker { position: absolute; left: 65.82%; top: 28.78%; width: 18.75%; height: auto; z-index: 4; display: block; pointer-events: none; filter: drop-shadow(.12cqw .24cqw .22cqw #000d) drop-shadow(.25cqw .5cqw .6cqw #0009); }
-
 /* ---------- дисплей: бегущая строка пиксельным шрифтом ---------- */
 /* окно строки = стекло ЖК-дисплея: 18.6%..78.0% по ширине фото, плюс мягкое
    затухание у краёв — буквы больше не залезают на корпус плеера */

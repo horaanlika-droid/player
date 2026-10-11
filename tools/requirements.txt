@@ -1,6 +1,6 @@
 # Зависимости растровых и аудио-скриптов в tools/; в запущенном сайте не нужны.
 Pillow>=10
 numpy>=1.26
-opencv-python-headless>=4.10,<5  # выделение наклейки и ретушь plate.webp
+opencv-python-headless>=4.10,<5  # ретушь plate.webp
 scipy>=1.11                      # кассетная обработка звука make_cassette_audio.py
 imageio-ffmpeg>=0.5              # встроенный ffmpeg для кодирования assets/hbd.mp3
