@@ -16,13 +16,13 @@ html {
   min-height: 100%;
   -webkit-text-size-adjust: 100%;
   color-scheme: dark;
-  /* Рисуем амбиент на корневом холсте: он заполняет и экран, и safe area
-     Safari на iPad, не обрезаясь вместе с блоком страницы. */
-  background-color: #000;
-  background-image: radial-gradient(125% 100% at 50% 42%, #0000 52%, #000000b3 100%), url('layers/noise.png');
+  /* Продолжаем матовый фон фотографии (#0b0b0a + спектральное зерно noise.png)
+     на весь корневой холст и safe area Safari, без резкого затемнения вокруг плеера. */
+  background-color: #0b0b0a;
+  background-image: radial-gradient(130% 110% at 50% 44%, #0000 68%, #00000045 100%), url('layers/noise.png?v=2');
   background-repeat: no-repeat, repeat;
   background-position: center, left top;
-  background-size: cover, 192px 192px;
+  background-size: cover, 256px 256px;
 }
 body { min-height: 100vh; min-height: 100dvh; margin: 0; background: transparent; color: var(--paper); font-family: 'Courier New', Courier, monospace; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 button { font: inherit; }
@@ -34,8 +34,9 @@ button { font: inherit; }
 
 /* ---------- устройство: фото-панель, поверх — бобины, наклейка, дисплей, клавиши ---------- */
 /* высота плеера — не больше 72% высоты окна: вокруг всегда остаётся фон
-   (важно на iPad и в ландшафте, где раньше плеер упирался в края экрана) */
-.device { position: relative; width: min(500px, 100%, calc(72vh * 2 / 3)); width: min(500px, 100%, calc(72dvh * 2 / 3)); margin: 0 auto; aspect-ratio: 1024 / 1536; container-type: inline-size; isolation: isolate; filter: drop-shadow(0 30px 60px #000d) drop-shadow(0 6px 16px #000b); }
+   (важно на iPad и в ландшафте, где раньше плеер упирался в края экрана).
+   Тень строится по прозрачному силуэту plate.webp, а не по прямоугольнику кадра. */
+.device { position: relative; width: min(500px, 100%, calc(72vh * 2 / 3)); width: min(500px, 100%, calc(72dvh * 2 / 3)); margin: 0 auto; aspect-ratio: 1024 / 1536; container-type: inline-size; isolation: isolate; filter: drop-shadow(8px 22px 26px #000c) drop-shadow(2px 6px 8px #000a); }
 .plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
 
 /* Бобины, вырезанные из IMG_1468.png: вращаются только при игре */
@@ -53,7 +54,7 @@ button { font: inherit; }
    крупнее и контрастнее прежнего пиксельного Handjet. Блок точно по бумаге
    (в фото 1024x1536: x 199-788, y 334-427). text-stroke и тень добавляют
    glyph-массу — лента машинки пробивает жирнее, чем экранная кегль. */
-.cassette-label { position: absolute; left: 19%; width: 58%; top: 21.9%; height: 6.1%; z-index: 4; display: grid; place-items: center; margin: 0; color: #140e09; font: 400 4.4cqw/1 'Special Elite', 'Courier New', Courier, monospace; text-align: center; -webkit-text-stroke: .06cqw #140e09; text-shadow: 0 0 .14cqw #140e0966; mix-blend-mode: multiply; opacity: 1; transform: rotate(-.8deg); pointer-events: none; /* печать: неровная краска, зерно и растекание (фильтр #print-ink в index.html) */ filter: url(#print-ink); }
+.cassette-label { position: absolute; left: 19%; width: 58%; top: 21.9%; height: 6.1%; z-index: 4; display: grid; place-items: center; margin: 0; color: #140e09; font: 400 4.3cqw/1 'Special Elite', 'Courier New', Courier, monospace; white-space: nowrap; text-align: center; -webkit-text-stroke: .06cqw #140e09; text-shadow: 0 0 .14cqw #140e0966; mix-blend-mode: multiply; opacity: 1; transform: rotate(-.8deg); pointer-events: none; /* печать: неровная краска, зерно и растекание (фильтр #print-ink в index.html) */ filter: url(#print-ink); }
 
 /* Чёрное печатное «catch» внутри красного сердечка на стикере «I ♥ 22» */
 .heart-tag { position: absolute; left: 78.86%; top: 36.4%; transform: translate(-50%, -50%) rotate(-4deg); z-index: 4; margin: 0; color: #000; font: 700 2.15cqw/1 'Handjet', 'Courier New', Courier, monospace; letter-spacing: .02em; white-space: nowrap; pointer-events: none; text-shadow: 0 .12cqw #5a0a0a55; opacity: 1; }
