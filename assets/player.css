@@ -37,6 +37,10 @@ button { font: inherit; }
    (важно на iPad и в ландшафте, где раньше плеер упирался в края экрана).
    Тень строится по прозрачному силуэту plate.webp, а не по прямоугольнику кадра. */
 .device { position: relative; width: min(500px, 100%, calc(72vh * 2 / 3)); width: min(500px, 100%, calc(72dvh * 2 / 3)); margin: 0 auto; aspect-ratio: 1024 / 1536; container-type: inline-size; isolation: isolate; filter: drop-shadow(8px 22px 26px #000c) drop-shadow(2px 6px 8px #000a); }
+/* Чёрный провод от наушников: выходит ровно из хвостовика штекера PHONES
+   (x = 146..210 из 1024, ось x = 177) и уходит вертикально вверх
+   за пределы фона и экрана на любой высоте окна. */
+.cord { position: absolute; left: 14.2578125%; width: 6.25%; bottom: calc(100% - 1px); height: max(60%, 55vh); height: max(60%, 55dvh); z-index: 1; pointer-events: none; background: url('layers/cord.png?v=3') repeat-y center bottom / 100% auto; }
 .plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
 
 /* Бобины, вырезанные из IMG_1468.png: вращаются только при игре */
