@@ -8,7 +8,7 @@
  *   • слушать 0.0.0.0, а не 127.0.0.1 — иначе reverse proxy не достучится
  *     до контейнера и домен отдаст 502/504;
  *   • брать порт из process.env.PORT (в панели бота задаётся тот же порт,
- *     по умолчанию 3000), а не хардкодить его;
+ *     по умолчанию 8080), а не хардкодить его;
  *   • отвечать 200 на /health — по этому адресу проверяют, что сервис жив.
  *
  * Зависимостей нет: только стандартная библиотека Node.js (>= 18), поэтому
@@ -30,7 +30,7 @@ const zlib = require('zlib');
 
 const ROOT = __dirname;
 const HOST = process.env.HOST || '0.0.0.0';
-const PORT = Number.parseInt(process.env.PORT || '3000', 10) || 3000;
+const PORT = Number.parseInt(process.env.PORT || '8080', 10) || 8080;
 const STARTED_AT = Date.now();
 
 const MIME = {
