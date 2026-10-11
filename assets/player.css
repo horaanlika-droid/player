@@ -11,7 +11,7 @@
 @font-face { font-family: 'Neucha'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/neucha-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 
 * { box-sizing: border-box; }
-:root { --paper: #c6c0ae; --orange: #ce7c32; --lcd-ink: #2a3320; }
+:root { --paper: #c6c0ae; --orange: #ce7c32; --lcd-ink: #0b1006; }
 html {
   min-height: 100%;
   -webkit-text-size-adjust: 100%;
@@ -60,14 +60,14 @@ button { font: inherit; }
    glyph-массу — лента машинки пробивает жирнее, чем экранная кегль. */
 .cassette-label { position: absolute; left: 19%; width: 58%; top: 21.9%; height: 6.1%; z-index: 4; display: grid; place-items: center; margin: 0; color: #140e09; font: 400 4.3cqw/1 'Special Elite', 'Courier New', Courier, monospace; white-space: nowrap; text-align: center; -webkit-text-stroke: .06cqw #140e09; text-shadow: 0 0 .14cqw #140e0966; mix-blend-mode: multiply; opacity: 1; transform: rotate(-.8deg); pointer-events: none; /* печать: неровная краска, зерно и растекание (фильтр #print-ink в index.html) */ filter: url(#print-ink); }
 
-/* Наклейка «1 YEAR! CATCH 22» с бокалом, вырезанная из IMG_1448.jpeg. */
-.goblet-sticker { position: absolute; left: 69.14%; top: 33.59%; width: 14.36%; height: auto; z-index: 4; display: block; pointer-events: none; filter: drop-shadow(.15cqw .3cqw .3cqw #0009); }
+/* Наклейка «1 YEAR! CATCH 22» с бокалом, реставрированная из IMG_1448.jpeg. */
+.goblet-sticker { position: absolute; left: 65.82%; top: 28.78%; width: 18.75%; height: auto; z-index: 4; display: block; pointer-events: none; filter: drop-shadow(.12cqw .24cqw .22cqw #000d) drop-shadow(.25cqw .5cqw .6cqw #0009); }
 
 /* ---------- дисплей: бегущая строка пиксельным шрифтом ---------- */
 /* окно строки = стекло ЖК-дисплея: 18.6%..78.0% по ширине фото, плюс мягкое
    затухание у краёв — буквы больше не залезают на корпус плеера */
 .readout-clip { position: absolute; left: 18.6%; width: 59.4%; top: 61.8%; height: 8.8%; z-index: 3; overflow: hidden; display: flex; align-items: center; justify-content: center; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, #0000 0, #000 1.3cqw, #000 calc(100% - 1.3cqw), #0000 100%); mask-image: linear-gradient(90deg, #0000 0, #000 1.3cqw, #000 calc(100% - 1.3cqw), #0000 100%); }
-.readout { display: block; width: 100%; font: 700 3.5cqw/1 'Handjet', 'Courier New', monospace; letter-spacing: .04em; color: var(--lcd-ink); white-space: nowrap; text-align: center; text-shadow: 0 1px 0 #ffffff14; }
+.readout { display: block; width: 100%; font: 700 3.5cqw/1 'Handjet', 'Courier New', monospace; letter-spacing: .04em; color: var(--lcd-ink); -webkit-text-stroke: .04cqw var(--lcd-ink); white-space: nowrap; text-align: center; text-shadow: 0 0 .28cqw rgba(9, 14, 5, .72), .16cqw .24cqw .32cqw rgba(6, 10, 3, .45), 0 1px 0 rgba(210, 224, 180, .16); filter: blur(.085cqw) contrast(1.18); }
 .readout.marquee { width: max-content; flex: 0 0 auto; text-align: left; }
 .readout.marquee-run { animation: marquee 30s linear infinite; }
 @keyframes marquee { from { transform: translateX(calc(50% + 29.7cqw)); } to { transform: translateX(calc(-50% - 29.7cqw)); } }
