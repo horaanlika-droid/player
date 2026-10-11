@@ -20,31 +20,23 @@
     <div class="reel reel-a" aria-hidden="true"><img src="assets/layers/reel-a.png" alt=""></div>
     <div class="reel reel-b" aria-hidden="true"><img src="assets/layers/reel-b.png" alt=""></div>
     <div class="glass" aria-hidden="true"></div>
+    <p class="cassette-label">НАМ 1 ГОД!</p>
 
-    <div class="readout-clip" aria-hidden="true">
+    <div class="readout-clip">
       <div class="readout" id="readout" role="status">CATCH22 &gt; READY</div>
     </div>
 
     <div class="transport">
-      <button class="key-hit" id="btnRew" type="button" aria-label="Назад на 3 секунды"><span class="key-glow" aria-hidden="true"></span></button>
-      <button class="key-hit key-play" id="btnPlay" type="button" aria-label="Играть" aria-pressed="false"><span class="key-glow" aria-hidden="true"></span></button>
-      <button class="key-hit" id="btnFwd" type="button" aria-label="Вперёд на 3 секунды"><span class="key-glow" aria-hidden="true"></span></button>
-      <button class="key-hit" id="btnStop" type="button" aria-label="Стоп"><span class="key-glow" aria-hidden="true"></span></button>
-      <button class="key-hit" id="btnPause" type="button" aria-label="Пауза"><span class="key-glow" aria-hidden="true"></span></button>
+      <button class="key-hit" id="btnRew" type="button" aria-label="Назад на 3 секунды"></button>
+      <button class="key-hit key-play" id="btnPlay" type="button" aria-label="Играть" aria-pressed="false"><span class="play-indicator" aria-hidden="true"></span></button>
+      <button class="key-hit" id="btnFwd" type="button" aria-label="Вперёд на 3 секунды"></button>
+      <button class="key-hit" id="btnStop" type="button" aria-label="Стоп"></button>
+      <button class="key-hit" id="btnPause" type="button" aria-label="Пауза"></button>
     </div>
 
     <div class="vol-hit" id="volTrack" role="slider" aria-label="Громкость"
-         aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" tabindex="0">
-      <div class="vol-marker" id="volMarker" aria-hidden="true"></div>
-    </div>
+         aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" tabindex="0"></div>
   </section>
-
-  <div class="info-panel" aria-label="Дата и место">
-    <div><span class="info-big">23.10</span><span class="info-sub">СБОР ГОСТЕЙ — 20:00</span></div>
-    <div><span class="info-big">CATCH 22</span><i class="info-dash" aria-hidden="true"></i><span class="info-sub">НАБ. ФОНТАНКИ, 86</span></div>
-    <div><span class="info-sub">ПЕРЕВЕРНИ ПЛАСТИНКУ</span><span class="info-big">SIDE B ★</span></div>
-  </div>
-  <div class="serial"><span>CATCH 22 © MMXXV</span><span>365 DAYS ON REPEAT</span></div>
 </main>
 <div class="soundwall" id="soundwall"><button type="button" id="unlockBtn">ВКЛЮЧИТЬ ЗВУК</button></div>
 <audio id="track" src="assets/hbd.mp3" loop preload="auto" playsinline></audio>
@@ -55,13 +47,13 @@
 
   var player   = document.getElementById('player');
   var readout  = document.getElementById('readout');
+  var readoutClip = readout.parentNode;
   var btnPlay  = document.getElementById('btnPlay');
   var btnPause = document.getElementById('btnPause');
   var btnStop  = document.getElementById('btnStop');
   var btnRew   = document.getElementById('btnRew');
   var btnFwd   = document.getElementById('btnFwd');
   var volTrack = document.getElementById('volTrack');
-  var volMarker = document.getElementById('volMarker');
   var wall     = document.getElementById('soundwall');
   var unlock   = document.getElementById('unlockBtn');
 
@@ -81,6 +73,7 @@
   function setReadout(text, marquee) {
     readout.textContent = text;
     readout.classList.toggle('marquee', !!marquee);
+    readoutClip.classList.toggle('marquee-active', !!marquee);
     readout.classList.remove('marquee-run');
     if (marquee) {
       /* перезапуск анимации бегущей строки */
@@ -243,7 +236,6 @@
     volume = Math.max(0, Math.min(1, v));
     track.volume = volume;
     volTrack.setAttribute('aria-valuenow', Math.round(volume * 100));
-    volMarker.style.top = (VOL_TOP + (1 - volume) * VOL_SPAN) + '%';
     if (showReadout) {
       setReadout(volBar(volume), false);
       clearTimeout(volTimer);
