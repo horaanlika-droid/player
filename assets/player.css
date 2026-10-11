@@ -43,13 +43,14 @@ button { font: inherit; }
 .cord { position: absolute; left: 14.2578125%; width: 6.25%; bottom: calc(100% - 1px); height: max(60%, 55vh); height: max(60%, 55dvh); z-index: 1; pointer-events: none; background: url('layers/cord.png?v=20261011') repeat-y center bottom / 100% auto; }
 .plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
 
-/* Бобины, вырезанные из IMG_1468.png: вращаются только при игре */
-.reel { position: absolute; width: 9.77%; aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 2; animation: spin-ccw 6.2s linear infinite paused; }
+/* Бобины, вырезанные из IMG_1468.png: вращаются только при игре.
+   Направление — по часовой стрелке, как у реальной кассеты в плеере. */
+.reel { position: absolute; width: 9.77%; aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 2; animation: spin-cw 6.2s linear infinite paused; }
 .reel img { width: 100%; height: 100%; display: block; }
 .reel-a { left: 32.84%; top: 32.0%; }
 .reel-b { left: 63.02%; top: 32.0%; animation-duration: 4.4s; }
 .is-playing .reel { animation-play-state: running; }
-@keyframes spin-ccw { to { transform: translate(-50%, -50%) rotate(-360deg); } }
+@keyframes spin-cw { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
 /* блик на стекле кассетного окна */
 .glass { position: absolute; left: 24%; width: 50%; top: 27.5%; height: 15.5%; z-index: 3; border-radius: 3cqw; pointer-events: none; background: linear-gradient(110deg, #d9d0b00d, transparent 32%, #d9d0b00e 51%, transparent 56%); }
