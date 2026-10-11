@@ -74,17 +74,18 @@ button { font: inherit; }
   width: max-content;
   flex: 0 0 auto;
   text-align: left;
-  font-size: 4.7cqw;
+  font-size: 9.4cqw;
   letter-spacing: .055em;
   opacity: .96;
   color: transparent;
   -webkit-text-fill-color: transparent;
   -webkit-text-stroke: 0;
   text-shadow: none;
-  /* 9–10 крупных кругов по высоте буквы — масштаб, близкий к табло-референсу */
-  background-image: radial-gradient(circle at center, #17220d 0 .16cqw, #1d2c11 .18cqw, transparent .205cqw);
-  background-position: .03cqw .03cqw;
-  background-size: .50cqw .50cqw;
+  /* 9–10 крупных кругов по высоте буквы — масштаб, близкий к табло-референсу;
+     сетка точек увеличена вместе с буквами (×2), чтобы рисунок остался прежним */
+  background-image: radial-gradient(circle at center, #17220d 0 .32cqw, #1d2c11 .36cqw, transparent .41cqw);
+  background-position: .06cqw .06cqw;
+  background-size: 1cqw 1cqw;
   -webkit-background-clip: text;
   background-clip: text;
   filter: drop-shadow(.05cqw .10cqw .10cqw rgba(6, 10, 3, .55));
