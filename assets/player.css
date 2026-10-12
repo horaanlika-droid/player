@@ -91,7 +91,10 @@ button { font: inherit; }
   background-clip: text;
   filter: drop-shadow(.05cqw .10cqw .10cqw rgba(6, 10, 3, .55));
 }
-.readout.marquee-run { animation: marquee 30s linear infinite; }
+/* отрицательная задержка: первый круг начинается уже с текстом в окне
+   (первая буква — примерно в четверти окна от левого края), а не с пустого
+   дисплея, по которому строка ~2 с выезжает справа; следующие круги — полные */
+.readout.marquee-run { animation: marquee 30s linear -1.7s infinite; }
 @keyframes marquee { from { transform: translateX(calc(50% + 29.7cqw)); } to { transform: translateX(calc(-50% - 29.7cqw)); } }
 
 /* ---------- транспорт: прозрачные зоны поверх клавиш фото ---------- */
