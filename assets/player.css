@@ -1,14 +1,14 @@
 /* Handjet — пиксельный шрифт бегущей строки (точечная матрица, полная кириллица) */
-@font-face { font-family: 'Handjet'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/handjet-cyrillic-400-normal.woff2?v=20261011') format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
-@font-face { font-family: 'Handjet'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/handjet-latin-400-normal.woff2?v=20261011') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-@font-face { font-family: 'Handjet'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/handjet-cyrillic-700-normal.woff2?v=20261011') format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
-@font-face { font-family: 'Handjet'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/handjet-latin-700-normal.woff2?v=20261011') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Handjet'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/handjet-cyrillic-400-normal.woff2') format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'Handjet'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/handjet-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Handjet'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/handjet-cyrillic-700-normal.woff2') format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'Handjet'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/handjet-latin-700-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 /* Neucha — неровный рукописный шрифт для бумажной наклейки */
-@font-face { font-family: 'Neucha'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/neucha-cyrillic-400-normal.woff2?v=20261011') format('woff2'); unicode-range: U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'Neucha'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/neucha-cyrillic-400-normal.woff2') format('woff2'); unicode-range: U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
 /* Special Elite — потёртая печатная машинка для надписи на бумажной наклейке
    (Apache 2.0; latin-сабсет из @fontsource/special-elite) */
-@font-face { font-family: 'Special Elite'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/special-elite-latin-400-normal.woff2?v=20261011') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-@font-face { font-family: 'Neucha'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/neucha-latin-400-normal.woff2?v=20261011') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Special Elite'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/special-elite-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Neucha'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/neucha-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 
 * { box-sizing: border-box; }
 :root { --paper: #c6c0ae; --orange: #ce7c32; --lcd-ink: #0b1006; }
@@ -19,7 +19,7 @@ html {
   /* Продолжаем матовый фон фотографии (#0b0b0a + спектральное зерно noise.png)
      на весь корневой холст и safe area Safari, без резкого затемнения вокруг плеера. */
   background-color: #0b0b0a;
-  background-image: radial-gradient(130% 110% at 50% 44%, #0000 68%, #00000045 100%), url('layers/noise.png?v=20261011');
+  background-image: radial-gradient(130% 110% at 50% 44%, #0000 68%, #00000045 100%), url('layers/noise.png');
   background-repeat: no-repeat, repeat;
   background-position: center, left top;
   background-size: cover, 256px 256px;
@@ -40,16 +40,17 @@ button { font: inherit; }
 /* Чёрный провод от наушников: выходит ровно из хвостовика штекера PHONES
    (x = 146..210 из 1024, ось x = 177) и уходит вертикально вверх
    за пределы фона и экрана на любой высоте окна. */
-.cord { position: absolute; left: 14.2578125%; width: 6.25%; bottom: calc(100% - 1px); height: max(60%, 55vh); height: max(60%, 55dvh); z-index: 1; pointer-events: none; background: url('layers/cord.png?v=20261011') repeat-y center bottom / 100% auto; }
+.cord { position: absolute; left: 14.2578125%; width: 6.25%; bottom: calc(100% - 1px); height: max(60%, 55vh); height: max(60%, 55dvh); z-index: 1; pointer-events: none; background: url('layers/cord.png') repeat-y center bottom / 100% auto; }
 .plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; }
 
-/* Бобины, вырезанные из IMG_1468.png: вращаются только при игре */
-.reel { position: absolute; width: 9.77%; aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 2; animation: spin-ccw 6.2s linear infinite paused; }
+/* Бобины, вырезанные из IMG_1468.png: вращаются только при игре.
+   Направление — по часовой стрелке, как у реальной кассеты в плеере. */
+.reel { position: absolute; width: 9.77%; aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 2; animation: spin-cw 6.2s linear infinite paused; }
 .reel img { width: 100%; height: 100%; display: block; }
 .reel-a { left: 32.84%; top: 32.0%; }
 .reel-b { left: 63.02%; top: 32.0%; animation-duration: 4.4s; }
 .is-playing .reel { animation-play-state: running; }
-@keyframes spin-ccw { to { transform: translate(-50%, -50%) rotate(-360deg); } }
+@keyframes spin-cw { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
 /* блик на стекле кассетного окна */
 .glass { position: absolute; left: 24%; width: 50%; top: 27.5%; height: 15.5%; z-index: 3; border-radius: 3cqw; pointer-events: none; background: linear-gradient(110deg, #d9d0b00d, transparent 32%, #d9d0b00e 51%, transparent 56%); }

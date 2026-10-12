@@ -22,6 +22,10 @@
  *     браузер/CDN не могут подхватить старую копию, бампать версии руками
  *     больше не нужно (и не нужно ничего добавлять в .gitignore — он на кэш
  *     не влияет);
+ *   • метка сборки (build) — sha1 переписанного index.html: отдаётся в /health,
+ *     в заголовке X-Build и в <meta name="build"> страницы. Страница сверяет
+ *     свою метку с живой и перечитывается, если кэш платформы всё-таки показал
+ *     старую копию;
  *   • поддержка Range — Safari на iPad перематывает mp3 только с ней;
  *   • ETag / Last-Modified → 304, чтобы повторные заходы не тянули 330 КБ mp3;
  *   • gzip для html/css/js, длинный Cache-Control для assets;
@@ -39,9 +43,15 @@ const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number.parseInt(process.env.PORT || '8080', 10) || 8080;
 const STARTED_AT = Date.now();
 
-// метка сборки: видна в /health и в заголовке X-App-Version ответов html —
-// по ней сразу видно, какая версия живёт на хосте
-const APP_VERSION = '2026-10-11';
+// Метка сборки = sha1 уже переписанного index.html, то есть хэш всех ссылок
+// на ассеты и тела css. Раньше здесь была зашитая дата: она не менялась между
+// деплоями, поэтому понять, какая версия реально живёт на хосте, было нельзя.
+// Теперь метка меняется при любом изменении страницы и видна в трёх местах:
+// /health → build, заголовок X-Build ответа html и <meta name="build"> в самой
+// странице. Страница сверяет свою метку с живой и перечитывается, если ей
+// показали старую копию (см. «страховка от старой версии» в index.html).
+const BUILD_PLACEHOLDER = '__BUILD_ID__';
+let BUILD_ID = 'unknown'; // живая метка: её называют /health, X-Build и meta
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -80,6 +90,9 @@ const CACHE_ASSET = 'public, max-age=86400';                  // прочие а
 // html — всегда свежий: иначе CDN/браузер показывает старую страницу
 // со старыми ссылками ?v=, и никакой бустинг ассетов уже не поможет
 const CACHE_HTML = 'no-cache, no-store, must-revalidate';
+// те же указания для кэша ПЛАТФОРМЫ: CDN перед контейнером (BotHost ставит
+// свой прокси) смотрит на эти заголовки раньше, чем на Cache-Control
+const CACHE_CDN_NONE = 'no-store';
 
 const NOT_FOUND_PAGE = `<!DOCTYPE html>
 <html lang="ru"><head><meta charset="UTF-8">
@@ -294,6 +307,46 @@ async function rewriteRefs(text, fromAbs, seen) {
   return out + text.slice(last);
 }
 
+// sha1 переписанного index.html = метка сборки: в нём уже зашиты хэши css и
+// всех картинок, поэтому метка меняется, даже если правили только ассет.
+// Соль — содержимое самого сервера: метка описывает сборку ЦЕЛИКОМ (сервер +
+// страницу). Считывается один раз при старте и описывает именно тот код,
+// который сейчас отвечает, а не файл на диске.
+const RUNTIME_SALT = (() => {
+  try {
+    return sha1hex(fs.readFileSync(__filename)).slice(0, 10);
+  } catch {
+    return 'nosalt';
+  }
+})();
+
+function buildIdOf(rewritten) {
+  return sha1hex(RUNTIME_SALT + sha1hex(Buffer.from(rewritten, 'utf8'))).slice(0, 10);
+}
+
+// /health зовёт это перед ответом. Пересчитываем ВСЕГДА и без кэша по mtime
+// index.html: метка зависит от всего переписанного тела (css, картинки, mp3),
+// и правка одного ассета обязана её менять — иначе /health рапортует сборку,
+// которой уже нет, а страница со свежей разметкой уходит в перезагрузку.
+// Дорого не выходит: содержимое ассетов кэширует versionCache, на запрос
+// остаются stat'ы и чтение самого html.
+async function currentBuildId() {
+  const abs = path.join(ROOT, 'index.html');
+  try {
+    const raw = await fs.promises.readFile(abs, 'utf8');
+    BUILD_ID = buildIdOf(await rewriteRefs(raw, abs, new Set([abs])));
+  } catch (err) {
+    console.error('build id unavailable:', err.message);
+  }
+  return BUILD_ID;
+}
+
+// Хэш считается по телу С ПЛЕЙСХОЛДЕРОМ, а метка подставляется уже после —
+// иначе метка влияла бы сама на себя и менялась бы на каждом запросе.
+function withBuildId(body, id) {
+  return body.indexOf(BUILD_PLACEHOLDER) === -1 ? body : body.split(BUILD_PLACEHOLDER).join(id);
+}
+
 /* ─────────────────────────── обработчик ─────────────────────────── */
 
 async function handle(req, res) {
@@ -311,13 +364,15 @@ async function handle(req, res) {
     const body = JSON.stringify({
       status: 'ok',
       service: 'catch22-player',
-      version: APP_VERSION,
+      build: await currentBuildId(),
       uptime: Math.round((Date.now() - STARTED_AT) / 1000),
       port: PORT,
     }, null, 2) + '\n';
     return send(req, res, 200, {
       'Content-Type': MIME['.json'],
       'Cache-Control': 'no-store',
+      'CDN-Cache-Control': CACHE_CDN_NONE,
+      'Surrogate-Control': CACHE_CDN_NONE,
     }, body);
   }
 
@@ -351,7 +406,11 @@ async function handle(req, res) {
   // изменение ассета не обновило бы закэшированную страницу.
   if (ext === '.html' || ext === '.css') {
     const raw = await fs.promises.readFile(abs, 'utf8');
-    const body = await rewriteRefs(raw, abs, new Set([abs]));
+    const rewritten = await rewriteRefs(raw, abs, new Set([abs]));
+    // метку сборки берём из только что переписанного тела: что посчитали,
+    // то и отдаём — расхождения между meta, X-Build и /health быть не может
+    if (ext === '.html') BUILD_ID = buildIdOf(rewritten);
+    const body = withBuildId(rewritten, BUILD_ID);
     const buf = Buffer.from(body, 'utf8');
     const outEtag = `"${sha1hex(buf).slice(0, 16)}"`;
 
@@ -366,7 +425,9 @@ async function handle(req, res) {
     if (ext === '.html') {
       // супер-свежая страница: старый html со старыми ?v= — главный источник
       // «на хосте подгружается старая версия»
-      outHeaders['X-App-Version'] = APP_VERSION;
+      outHeaders['X-Build'] = BUILD_ID;
+      outHeaders['CDN-Cache-Control'] = CACHE_CDN_NONE;
+      outHeaders['Surrogate-Control'] = CACHE_CDN_NONE;
       outHeaders.Pragma = 'no-cache';
       outHeaders.Expires = 'Thu, 01 Jan 1970 00:00:00 GMT';
     }
@@ -482,9 +543,14 @@ server.on('clientError', (err, socket) => {
 server.keepAliveTimeout = 65 * 1000; // чуть больше трафикового idle-таймаута
 server.headersTimeout = 70 * 1000;
 
-server.listen(PORT, HOST, () => {
-  console.log(`Catch 22 player: http://${HOST}:${PORT}  (health: /health)`);
-});
+// Метку сборки считаем до listen(): страница и /health должны называть один
+// и тот же build с первой же секунды жизни контейнера.
+(async () => {
+  const build = await currentBuildId();
+  server.listen(PORT, HOST, () => {
+    console.log(`Catch 22 player: http://${HOST}:${PORT}  (build: ${build}, health: /health)`);
+  });
+})();
 
 // BotHost перезапускает контейнеры сигналом: закрываемся аккуратно,
 // чтобы не оставить висящих соединений (иначе сокет держится до таймаута).
