@@ -45,7 +45,8 @@
     <p class="cassette-label">catch22<br>1st anniversary invite</p>
 
     <div class="readout-clip">
-      <div class="readout" id="readout" role="status">CATCH22 &gt; READY</div>
+      <div class="readout" id="readout" role="status">CATCH22
+ФОНОТЕКА+БАР</div>
     </div>
 
     <div class="transport">
@@ -80,6 +81,8 @@
   var wall     = document.getElementById('soundwall');
   var unlock   = document.getElementById('unlockBtn');
 
+  /* надпись на дисплее в покое — две строки */
+  var IDLE = 'CATCH22\nФОНОТЕКА+БАР';
   var MARQUEE = ' * ПЕРВЫЙ ГОД CATCH 22 ЗАПИСАН — ПОРА ПЕРЕВЕРНУТЬ ПЛАСТИНКУ' +
     ' * 23 ОКТЯБРЯ ОТМЕЧАЕМ ДЕНЬ РОЖДЕНИЯ И ЗОВЁМ ДРУЗЕЙ — ВЫ В СПИСКЕ' +
     ' * СБОР ГОСТЕЙ — 20:00 * НАБ. ФОНТАНКИ, 86 * ХРАНИТЬ. НЕ ПЕРЕЗАПИСЫВАТЬ *';
@@ -116,7 +119,7 @@
     btnPlay.setAttribute('aria-pressed', String(on));
     btnPlay.setAttribute('aria-label', on ? 'Пауза' : 'Играть');
     if (on) setReadout(MARQUEE, true);
-    else    setReadout('CATCH22 > READY', false);
+    else    setReadout(IDLE, false);
   }
 
   function tryPlay() {
@@ -305,7 +308,7 @@
   });
 
   setVolume(0.75, false);
-  setReadout('CATCH22 > READY', false);
+  setReadout(IDLE, false);
 
   /* Прогрев аудио первым жестом вне транспорта (iOS/Safari):
      play() из пользовательского жеста разрешает последующий play() из кода. */
