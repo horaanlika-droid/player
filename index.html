@@ -9,6 +9,9 @@
 <meta name="build" content="__BUILD_ID__">
 <title>Catch 22 — День Рождения</title>
 <link rel="preload" href="assets/hbd.mp3" as="audio">
+<!-- кириллица Handjet нужна бегущей строке с первого кадра: без preload шрифт
+     догружается только при старте строки, и текст в первый миг дёргается -->
+<link rel="preload" href="assets/fonts/handjet-cyrillic-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/player.css">
 </head>
 <body>
@@ -91,6 +94,10 @@
   track.load();
 
   function setReadout(text, marquee) {
+    /* бегущая строка уже едет с этим текстом — не дёргаем её заново
+       (play() запускает её сразу по нажатию, а событие 'playing' приходит
+       позже, когда звук догрузится) */
+    if (marquee && readout.textContent === text && readout.classList.contains('marquee-run')) return;
     readout.textContent = text;
     readout.classList.toggle('marquee', !!marquee);
     readoutClip.classList.toggle('marquee-active', !!marquee);
@@ -126,6 +133,10 @@
   function play() {
     wantPlay = true;
     if (audioBroken) { startFallback(); return; }
+    /* строка стартует сразу по нажатию, не дожидаясь, пока mp3 догрузится
+       (на телефоне это заметная пауза); если play() откажет — tryPlay
+       вернёт READY */
+    setReadout(MARQUEE, true);
     tryPlay();
   }
 
