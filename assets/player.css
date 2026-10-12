@@ -65,7 +65,9 @@ button { font: inherit; }
 /* окно строки = стекло ЖК-дисплея: 18.6%..78.0% по ширине фото, плюс мягкое
    затухание у краёв — буквы больше не залезают на корпус плеера */
 .readout-clip { position: absolute; left: 18.6%; width: 59.4%; top: 61.8%; height: 8.8%; z-index: 3; overflow: hidden; display: flex; align-items: center; justify-content: center; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, #0000 0, #000 1.3cqw, #000 calc(100% - 1.3cqw), #0000 100%); mask-image: linear-gradient(90deg, #0000 0, #000 1.3cqw, #000 calc(100% - 1.3cqw), #0000 100%); }
-.readout { display: block; width: 100%; font: 700 3.5cqw/1 'Handjet', 'Courier New', monospace; letter-spacing: .04em; color: var(--lcd-ink); -webkit-text-stroke: .04cqw var(--lcd-ink); white-space: nowrap; text-align: center; text-shadow: 0 0 .28cqw rgba(9, 14, 5, .72), .16cqw .24cqw .32cqw rgba(6, 10, 3, .45), 0 1px 0 rgba(210, 224, 180, .16); filter: blur(.085cqw) contrast(1.18); }
+.readout { display: block; width: 100%; font: 700 5.4cqw/1.06 'Handjet', 'Courier New', monospace; letter-spacing: .05em; color: var(--lcd-ink); -webkit-text-stroke: .04cqw var(--lcd-ink); white-space: nowrap; text-align: center; text-shadow: 0 0 .28cqw rgba(9, 14, 5, .72), .16cqw .24cqw .32cqw rgba(6, 10, 3, .45), 0 1px 0 rgba(210, 224, 180, .16); filter: blur(.085cqw) contrast(1.18); }
+/* в покое дисплей показывает две строки: CATCH22 / ФОНОТЕКА+БАР */
+.readout:not(.marquee) { white-space: pre-line; }
 /* Текст приглашения — настоящая точечная матрица по образцу табло:
    круглая точка занимает почти всю ячейку, поэтому буквы не выглядят
    «запылёнными». Контур шрифта лишь задаёт форму символов, а видимым остаётся
